@@ -24,6 +24,13 @@ function evalFunc() {
     resetFunc();
 }
 
+function simulate() {
+    const st1 = Number(player1.value)
+    const st2 = Number(player2.value) 
+    console.log(playNGames(st1, st2, 10))
+
+}
+
 function updateOptions() {
    player1.innerHTML = ['Random', ...stratNames].map((n, index) => '<option value="'
    + (index - 1) + '">' + n + '</option>')
@@ -90,6 +97,7 @@ function playGame(strat1, strat2) {
 }
 
 function playNGames(st1, st2, n) {
+    console.log(st1, st2);
     const getStrat1 = () => strats[st1 < 0 ? Math.floor(Math.random() * strats.length):st1];
     const getStrat2 = () => strats[st2 < 0 ? Math.floor(Math.random() * strats.length):st2];
     return playNGamesHelper(getStrat1, getStrat2, n);
