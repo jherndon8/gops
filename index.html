@@ -6,11 +6,29 @@
   </head>
   <body >
     <h1>Gops</h1>
+    <hr>
+    <h2>Create a strategy<h2>
+    <h3>Strategy parameters</h3>
+    <p>bidsMade: An array of arrays of length 2. bidsMade[n][0] is the opponent's bid on turn n and bidsMade[n][1] is the treasure value of that round</p>
+    <p>bidsLeft: An array of numbers 1 - 13 with the already bid cards excluded. The return value must be a value within this array</p>
+    <p>treasure: the current treasure card</p>
+    <p>curTie: If there was a tie last round, this variable stores the total value of all tied treasure cards up for grabs. Useful for non-deterministic strategies</p>
     <textarea id="func"></textarea>
-    <button onclick="evalFunc()">evaluate</button>
+    <br>
+    <button onclick="evalFunc()">add strategy to pool</button>
+    <hr>
+    <h3>Simulate two strategies</h3>
+    player 1: 
     <select id="player1"></select>
+    player 2:
     <select id="player2"></select>
-    <button onclick="simulate()">simulate</button>
+    <br>
+    <p id="results"></p>
+    <button onclick="simulate(1)">simulate 1 game </button>
+    <button onclick="simulate(10)">simulate 10 games</button>
+    <button onclick="simulate(1000)">simulate 1000 games</button>
+    <hr>
+    <h3>Play against a strategy (coming soon)</h3>
     <div id="humanGames">
         <select id="player3"></select>
         <p>Computer's next bid may be revealed by highlighting below</p>

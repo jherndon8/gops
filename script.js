@@ -24,10 +24,20 @@ function evalFunc() {
     resetFunc();
 }
 
-function simulate() {
+async function simulate(n) {
     const st1 = Number(player1.value)
     const st2 = Number(player2.value) 
-    console.log(playNGames(st1, st2, 10))
+    const results = await playNGames(st1, st2, n)
+    const resultsDiv = document.getElementById('results')
+    resultsDiv.innerHTML = "Result: " +  (results.summary)
+    if (n == 1) {
+        const result = results.allResults[0]
+        console.log(result);
+        resultsDiv.innerHTML = result.fullResult;
+        resultsDiv.innerHtml = result.fullResult
+        resultsDiv.innerHTML += "<br> Player 0 bids:  "+result.bidsMade1 + "<br> Player 1 bids: " + result.bidsMade2 + "<br> Treasure order: " + result.treasureOrder
+    }
+
 
 }
 
@@ -51,7 +61,7 @@ function shuffleArray(array) {
     }
 }
 
-function playGame(strat1, strat2) {
+async function playGame(strat1, strat2) {
     const bidsMade1 = []
     const bidsMade2 = []
     const bidsLeft1 = [...Array(13).keys()].map(i=>i+1)
@@ -63,8 +73,8 @@ function playGame(strat1, strat2) {
     var total2 = 0
     while (deck.length > 0) {
         const treasure = deck.pop()
-        const bid1 = strat1(bidsMade1, bidsLeft1, treasure, tied)
-        const bid2 = strat2(bidsMade2, bidsLeft2, treasure, tied)
+        const bid1 = await strat1(bidsMade1, bidsLeft1, treasure, tied)
+        const bid2 = await strat2(bidsMade2, bidsLeft2, treasure, tied)
         bidsMade1.push([bid2, treasure])
         bidsMade2.push([bid1, treasure])
         if (!bidsLeft1.find(bid => bid === bid1)) {
@@ -96,17 +106,17 @@ function playGame(strat1, strat2) {
         fullResult: result + ": " + total1 + '-' + total2}
 }
 
-function playNGames(st1, st2, n) {
+async function playNGames(st1, st2, n) {
     console.log(st1, st2);
     const getStrat1 = () => strats[st1 < 0 ? Math.floor(Math.random() * strats.length):st1];
     const getStrat2 = () => strats[st2 < 0 ? Math.floor(Math.random() * strats.length):st2];
-    return playNGamesHelper(getStrat1, getStrat2, n);
+    return await playNGamesHelper(getStrat1, getStrat2, n);
 }
 
-function playNGamesHelper(getStrat1, getStrat2, n) {
+async function playNGamesHelper(getStrat1, getStrat2, n) {
     const results = []
     for (var i = 0; i < n; i++) {
-        results.push(playGame(getStrat1(), getStrat2()));
+        results.push(await playGame(getStrat1(), getStrat2()));
     }
     const p1Wins = results.filter(r => r.result == '1').length
     const p2Wins = results.filter(r => r.result == '2').length
