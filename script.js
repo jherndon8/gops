@@ -1,8 +1,12 @@
 const funcText = document.getElementById('func');
 
 const defaultFunc = '// default\n(bidsMade, bidsLeft, treasure, curTie) => {\n return treasure;\n}'
-const strats = [eval(defaultFunc)]
-const stratNames = ['default']
+const ascendingFunc = '// ascending\n(bidsMade, bidsLeft, treasure, curTie) => {\n return 14 - bidsLeft.length;\n}'
+const shuffledFunc = '// shuffled\n(bidsMade, bidsLeft, treasure, curTie) => {\n return bidsLeft[Math.floor(Math.random() * bidsLeft.length)];\n}'
+const oneMoreFunc = '// oneMore\n(bidsMade, bidsLeft, treasure, curTie) => {\n return treasure % 13 + 1;\n}'
+const strats = [eval(defaultFunc), eval(oneMoreFunc), eval(ascendingFunc), eval(shuffledFunc)]
+const stratNames = ['default', 'oneMore', 'ascending','shuffled']
+const stratStrings = [defaultFunc, oneMoreFunc, ascendingFunc, shuffledFunc]
 const player1 = document.getElementById('player1')
 const player2 = document.getElementById('player2')
 const player3 = document.getElementById('player3')
@@ -24,6 +28,75 @@ function evalFunc() {
     resetFunc();
 }
 
+function dispStrat() {
+    document.getElementById('readStrat').value = stratStrings[player1.value < 0 ? Math.floor(Math.random() * stratStrings.length) : player1.value]
+}
+
+var comp;
+var bidsMadePlayer;
+var bidsMadeComp;
+var bidsLeftPlayer;
+var bidsLeftComp;
+var deck;
+var tiedVal;
+var totalPlayer;
+var totalComp;
+var curTreasure;
+var compBid;
+
+function startMatch() {
+    const st1 =Number(player3.value);
+    comp = strats[st1 < 0 ? Math.floor(Math.random() * strats.length):st1];
+    bidsMadePlayer =[];
+    bidsMadeComp = []
+    bidsLeftPlayer = [...Array(13).keys()].map(i=>i+1)
+    bidsLeftComp = [...bidsLeftPlayer]
+    deck = [...bidsLeftPlayer]
+    shuffleArray(deck)
+    tiedVal = 0
+    totalPlayer = 0
+    totalComp = 0
+    draw();
+}
+
+function draw() {
+    curTreasure = deck.pop();
+    compBid = curTreasure ? comp(bidsMadeComp, bidsLeftComp, curTreasure, tiedVal) : compBid;
+    document.getElementById('nextBid').innerHTML = compBid;
+    document.getElementById('makeBid').innerHTML = bidsLeftPlayer
+        .map(b => '<option value="'+b+'">'+b+'</option>')
+        .join('');
+    document.getElementById('humanScore').innerHTML = 'Computer score: ' + totalComp
+    document.getElementById('computerScore').innerHTML = 'Player score: ' + totalPlayer
+    document.getElementById('curTreasure').innerHTML = curTreasure ? 'Current treasure: ' + curTreasure : (totalComp == totalPlayer ? 'Game ends in tie!': totalComp > totalPlayer ? 'Computer wins!' : 'Player wins!')
+    document.getElementById('curTiedCards').innerHTML = 'Current sum of bonus tied cards: ' + tiedVal
+    document.getElementById('pastBids').innerHTML = 'Past opponent bids: ' + bidsMadePlayer.map(a => a[0])
+    document.getElementById('pastTreasure').innerHTML = 'Past treasure values: ' + bidsMadePlayer.map(a => a[1])
+
+
+}
+
+function submitPlayerBid() {
+    const playerBid = Number(document.getElementById('makeBid').value)
+    if (!playerBid) return;
+    bidsMadePlayer.push([compBid, curTreasure])
+    bidsMadeComp.push([playerBid, curTreasure])
+    bidsLeftPlayer.splice(bidsLeftPlayer.indexOf(playerBid), 1)
+    bidsLeftComp.splice(bidsLeftComp.indexOf(compBid), 1)
+    if (playerBid > compBid) {
+        totalPlayer += curTreasure + tiedVal;
+    }
+    if (playerBid < compBid) {
+        totalComp += curTreasure + tiedVal;
+    }
+    if (playerBid === compBid) {
+        tiedVal += curTreasure
+    } else {
+        tiedVal = 0;
+    }
+    draw();
+}
+
 async function simulate(n) {
     const st1 = Number(player1.value)
     const st2 = Number(player2.value) 
@@ -35,10 +108,8 @@ async function simulate(n) {
         console.log(result);
         resultsDiv.innerHTML = result.fullResult;
         resultsDiv.innerHtml = result.fullResult
-        resultsDiv.innerHTML += "<br> Player 0 bids:  "+result.bidsMade1 + "<br> Player 1 bids: " + result.bidsMade2 + "<br> Treasure order: " + result.treasureOrder
+        resultsDiv.innerHTML += "<br> Player 1 bids:  "+result.bidsMade1 + "<br> Player 2 bids: " + result.bidsMade2 + "<br> Treasure order: " + result.treasureOrder
     }
-
-
 }
 
 function updateOptions() {
